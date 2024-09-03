@@ -67,19 +67,23 @@ async def translate_message(content):
     try:
         url_pattern = re.compile(r'(https?://\S+)|(www\.\S+)')
         urls = re.findall(url_pattern, content)
-        masked_content = re.sub(url_pattern, lambda x: f"[링크]({x.group(0)})", content)
+        masked_content = re.sub(url_pattern, lambda x: f"[link]({x.group(0)})", content)
 
+        # 요약 및 번역 방향 설정
         if any(char in masked_content for char in "가나다라마바사아자차카타파하"):
-            prompt = f"Translate the following Korean text to English: {masked_content}"
+            prompt = f"Summarize the key points of the following Korean text and translate it to English. Provide only the translated summary: {masked_content}"
         elif any(char in masked_content for char in "абвгґдежзийклмнопрстуфхцчшщьюяіїє"):
-            prompt = f"Translate the following Ukrainian text to Korean: {masked_content}"
+            prompt = f"Summarize the key points of the following Ukrainian text and translate it to Korean. Provide only the translated summary: {masked_content}"
         else:
-            prompt = f"Translate the following English text to Korean: {masked_content}"
+            prompt = f"Summarize the key points of the following English text and translate it to Korean. Provide only the translated summary: {masked_content}"
 
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are a translation assistant. Your task is to summarize and translate the provided content. Provide only the translated summary, without including the original summary or any additional explanations. Keep the translation concise, and focus on the main points. If translating from Korean, use sentence endings like '-음' or '-ㅁ' and omit implied subjects or objects. If translating to English, use concise language and consider bullet points if necessary."},
+                {"role": "system", "content": 
+                 "You are a translation assistant. Your primary task is to summarize the key points and then translate the summary. "
+                 "Ensure that the summary includes only the most important information, omitting any unnecessary details or conversational fillers. "
+                 "The translation should be concise and to the point, focusing solely on the key points of the original text. Do not include the original content or summary in the output."},
                 {"role": "user", "content": prompt}
             ]
         )
