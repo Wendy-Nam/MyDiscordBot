@@ -65,27 +65,33 @@ class MyClient(discord.Client):
 
 async def translate_message(content):
     try:
+        # 글자 수에 따른 토큰 수 추정
+        char_count = len(content)
+        estimated_tokens = int(char_count / 2.5)  # 한국어의 경우 2~3글자가 1토큰 정도로 계산
+        max_tokens = min(max(50, estimated_tokens), 300)  # 최소 50, 최대 300 토큰으로 제한
+
+        # URL 마스킹 처리
         url_pattern = re.compile(r'(https?://\S+)|(www\.\S+)')
-        urls = re.findall(url_pattern, content)
-        masked_content = re.sub(url_pattern, lambda x: f"[link]({x.group(0)})", content)
+        masked_content = re.sub(url_pattern, lambda x: f"[링크]({x.group(0)})", content)
 
-        # 요약 및 번역 방향 설정
+        # 요약 및 번역 프롬프트 설정
         if any(char in masked_content for char in "가나다라마바사아자차카타파하"):
-            prompt = f"Summarize the key points of the following Korean text and translate it to English. Provide only the translated summary: {masked_content}"
+            prompt = f"Translate the following Korean text to English. Remove any filler sentences and unnecessary conversational style. Provide a concise translation focusing only on the key points. Here is the text: {masked_content}"
         elif any(char in masked_content for char in "абвгґдежзийклмнопрстуфхцчшщьюяіїє"):
-            prompt = f"Summarize the key points of the following Ukrainian text and translate it to Korean. Provide only the translated summary: {masked_content}"
+            prompt = f"Translate the following Ukrainian text to Korean. Remove any filler sentences and unnecessary conversational style. Provide a concise translation focusing only on the key points. Here is the text: {masked_content}"
         else:
-            prompt = f"Summarize the key points of the following English text and translate it to Korean. Provide only the translated summary: {masked_content}"
+            prompt = f"Translate the following English text to Korean. Remove any filler sentences and unnecessary conversational style. Provide a concise translation focusing only on the key points. Here is the text: {masked_content}"
 
+        # GPT-3.5-turbo 사용, 필러 제거 및 간결한 번역 유도
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": 
-                 "You are a translation assistant. Your primary task is to summarize the key points and then translate the summary. "
-                 "Ensure that the summary includes only the most important information, omitting any unnecessary details or conversational fillers. "
-                 "The translation should be concise and to the point, focusing solely on the key points of the original text. Do not include the original content or summary in the output."},
+                 "You are a translation assistant. Your task is to translate the provided content into the target language. Focus on removing any filler sentences and unnecessary conversational elements. Ensure that the translation is concise, direct, and focuses solely on the key points, especially when translating from Korean to English."},
                 {"role": "user", "content": prompt}
-            ]
+            ],
+            max_tokens=max_tokens,
+            temperature=0.3
         )
         
         translated_text = response['choices'][0]['message']['content']
