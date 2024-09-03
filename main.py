@@ -8,6 +8,7 @@ discord_bot_token = 'your_openai_api_key' # 🔐 REQUIRED / Discord 봇 토큰�
 openai.api_key = 'your_discord_token' # 🔐 REQUIRED / OpenAI API 키를 여기에 입력하세요.
 channel_ids = []  # 여러 채널 ID 추가
 
+
 class MyClient(discord.Client):
     async def on_ready(self):
         print(f'Logged in as {self.user}')
@@ -50,58 +51,98 @@ class MyClient(discord.Client):
         if message.channel.id in channel_ids or message.thread:
             translated_text = await translate_message(message.content)
             
-            def format_multiline_quote(text):
-                lines = text.split('\n')
-                formatted_lines = [f"> *{line}*" if line.strip() != "" else "> " for line in lines]
-                return '\n'.join(formatted_lines)
+            if translated_text:
+                formatted_text = format_multiline_quote(translated_text)
 
-            formatted_text = format_multiline_quote(translated_text)
+                if formatted_text:
+                    if message.thread:
+                        await message.thread.send(formatted_text)
+                    else:
+                        await message.channel.send(formatted_text)
+            else:
+                await message.channel.send("Sorry, I couldn't translate the message.")
 
-            if formatted_text:
-                if message.thread:
-                    await message.thread.send(formatted_text)
-                else:
-                    await message.channel.send(formatted_text)
+def format_multiline_quote(text):
+    if text is None:
+        return "Translation failed or produced no output."
+    lines = text.split('\n')
+    formatted_lines = [f"> *{line}*" if line.strip() != "" else "> " for line in lines]
+    return '\n'.join(formatted_lines)
+
+def split_text_by_sentence(text, max_length):
+    # 문장 단위로 나누기 위해 정규 표현식을 사용
+    sentence_endings = re.compile(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s')
+    sentences = sentence_endings.split(text)
+    chunks = []
+    current_chunk = ""
+    
+    for sentence in sentences:
+        if len(current_chunk) + len(sentence) > max_length:
+            chunks.append(current_chunk.strip())
+            current_chunk = sentence
+        else:
+            current_chunk += " " + sentence
+    
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+    
+    return chunks
 
 async def translate_message(content):
     try:
-        # 글자 수에 따른 토큰 수 추정
-        char_count = len(content)
-        estimated_tokens = int(char_count / 2.5)  # 한국어의 경우 2~3글자가 1토큰 정도로 계산
-        max_tokens = min(max(50, estimated_tokens), 300)  # 최소 50, 최대 300 토큰으로 제한
-
         # URL 마스킹 처리
         url_pattern = re.compile(r'(https?://\S+)|(www\.\S+)')
-        masked_content = re.sub(url_pattern, lambda x: f"[링크]({x.group(0)})", content)
+        masked_content = re.sub(url_pattern, "[link]", content)
 
-        # 요약 및 번역 프롬프트 설정
-        if any(char in masked_content for char in "가나다라마바사아자차카타파하"):
-            prompt = f"Translate the following Korean text to English. Remove any filler sentences and unnecessary conversational style. Provide a concise translation focusing only on the key points. Here is the text: {masked_content}"
-        elif any(char in masked_content for char in "абвгґдежзийклмнопрстуфхцчшщьюяіїє"):
-            prompt = f"Translate the following Ukrainian text to Korean. Remove any filler sentences and unnecessary conversational style. Provide a concise translation focusing only on the key points. Here is the text: {masked_content}"
-        else:
-            prompt = f"Translate the following English text to Korean. Remove any filler sentences and unnecessary conversational style. Provide a concise translation focusing only on the key points. Here is the text: {masked_content}"
+        # 링크만 있는지 확인
+        if masked_content.strip() == "[link]" * len(re.findall(url_pattern, content)):
+            return "This message only contains links, no translation provided."
 
-        # GPT-3.5-turbo 사용, 필러 제거 및 간결한 번역 유도
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": 
-                 "You are a translation assistant. Your task is to translate the provided content into the target language. Focus on removing any filler sentences and unnecessary conversational elements. Ensure that the translation is concise, direct, and focuses solely on the key points, especially when translating from Korean to English."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=max_tokens,
-            temperature=0.3
-        )
-        
-        translated_text = response['choices'][0]['message']['content']
+        # 문단 단위로 나누기 위해 개행 문자를 기준으로 분리
+        paragraphs = masked_content.split('\n\n')
+        translated_paragraphs = []
+
+        for paragraph in paragraphs:
+            # 문장이 너무 길 경우 청크로 분리
+            chunks = split_text_by_sentence(paragraph, max_length=500)
+            translated_chunks = []
+
+            for chunk in chunks:
+                # 번역할 텍스트와 언어를 명시
+                if any(char in chunk for char in "가나다라마바사아자차카타파하"):
+                    prompt = f"Translate this Korean text to English: {chunk}"
+                elif any(char in chunk for char in "абвгґдежзийклмнопрстуфхцчшщьюяіїє"):
+                    prompt = f"Translate this Ukrainian text to Korean: {chunk}"
+                else:
+                    prompt = f"Translate this English text to Korean: {chunk}"
+
+                # GPT-3.5-turbo 사용, 필러 제거 및 간결한 번역 유도
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": 
+                         "You are a translation assistant. Translate the provided content into the specified target language. Focus on removing filler sentences and unnecessary words, converting sentences into noun-based structures, and omitting any implicit subjects or verbs that are clear from context. Ensure that the translation is concise and focuses solely on the key points."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=300,
+                    temperature=0.07
+                )
+                translated_chunks.append(response['choices'][0]['message']['content'])
+
+            # 번역된 청크들을 합쳐서 문단으로 결합
+            translated_paragraph = ' '.join(translated_chunks)
+            translated_paragraphs.append(translated_paragraph)
+
+        # 번역된 문단들을 다시 합침
+        translated_text = '\n\n'.join(translated_paragraphs)
+
         translated_text = translated_text.replace('자산', '작업물')
 
         return translated_text
     
     except Exception as e:
         print(f'Error during translation: {e}')
-        return "Sorry, I couldn't translate the message."
+        return None  # 오류 발생 시 None을 반환
 
 # 봇 클라이언트 설정
 intents = discord.Intents.default()
