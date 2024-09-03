@@ -127,7 +127,7 @@ async def translate_message(content):
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": 
-                         "You are a translation assistant. Translate the provided content into the specified target language. For Korean translations, use the '-요' ending as the default tone. Avoid using formal endings like '-다/-습니다'. For personal reflections, informal notes, or casual statements, feel free to use informal endings or slang. The translation should be concise, clear, and free of unnecessary repetition or filler language. Focus on reducing the length and complexity of sentences while maintaining the core meaning. Ensure that bullet points, numbered lists (e.g., '1)', '2)'), and other formatting elements are preserved in the translation."},
+                         "You are a translation assistant. Translate the content into the specified target language. For Korean translations, use '-요' endings for general conversation. Avoid formal endings like '-다 / -습니다'. Use informal endings or slang for personal thoughts, casual statements, or emotions. Keep the translation concise and clear, avoiding filler language. Preserve bullet points, numbered lists, and formatting."},
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=300,
