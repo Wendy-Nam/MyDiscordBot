@@ -98,6 +98,17 @@ async def translate_message(content):
         if masked_content.strip() == "[link]" * len(re.findall(url_pattern, content)):
             return "This message only contains links, no translation provided."
 
+        # 메시지 전체에서 언어 감지
+        if any(char in masked_content for char in "가나다라마바사아자차카타파하"):
+            source_language = "Korean"
+            target_language = "English"
+        elif any(char in masked_content for char in "абвгґдежзийклмнопрстуфхцчшщьюяіїє"):
+            source_language = "Ukrainian"
+            target_language = "Korean"
+        else:
+            source_language = "English"
+            target_language = "Korean"
+
         # 문단 단위로 나누기 위해 개행 문자를 기준으로 분리
         paragraphs = masked_content.split('\n\n')
         translated_paragraphs = []
@@ -109,19 +120,14 @@ async def translate_message(content):
 
             for chunk in chunks:
                 # 번역할 텍스트와 언어를 명시
-                if any(char in chunk for char in "가나다라마바사아자차카타파하"):
-                    prompt = f"Translate this Korean text to English: {chunk}"
-                elif any(char in chunk for char in "абвгґдежзийклмнопрстуфхцчшщьюяіїє"):
-                    prompt = f"Translate this Ukrainian text to Korean: {chunk}"
-                else:
-                    prompt = f"Translate this English text to Korean: {chunk}"
+                prompt = f"Translate this {source_language} text to {target_language}: {chunk}"
 
                 # GPT-3.5-turbo 사용, 필러 제거 및 간결한 번역 유도
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": 
-                         "You are a translation assistant. Translate the provided content into the specified target language. Focus on removing filler sentences and unnecessary words, converting sentences into noun-based structures, and omitting any implicit subjects or verbs that are clear from context. Ensure that the translation is concise and focuses solely on the key points."},
+                         "You are a translation assistant. Translate the provided content into the specified target language using informal language and slang where appropriate. The translation should be concise, clear, and stripped of any unnecessary repetition or filler language. Focus on reducing the length and complexity of sentences while maintaining the core meaning. Ensure that bullet points and numbered lists are preserved in the translation."},
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=300,
@@ -135,7 +141,6 @@ async def translate_message(content):
 
         # 번역된 문단들을 다시 합침
         translated_text = '\n\n'.join(translated_paragraphs)
-
         translated_text = translated_text.replace('자산', '작업물')
 
         return translated_text
@@ -143,6 +148,7 @@ async def translate_message(content):
     except Exception as e:
         print(f'Error during translation: {e}')
         return None  # 오류 발생 시 None을 반환
+
 
 # 봇 클라이언트 설정
 intents = discord.Intents.default()
