@@ -168,15 +168,23 @@ async def translate_message(content):
 
         # 언어 감지
         try:
+            # source_language = langdetect.detect(masked_content)
+            # logger.debug(f"감지된 언어: {source_language}")
+            # 2024-05-20:  ko, en으로만 source language를 제한
             source_language = langdetect.detect(masked_content)
+            if source_language not in ['ko', 'en']:
+                source_language = 'en'
             logger.debug(f"감지된 언어: {source_language}")
         except langdetect.LangDetectException:
             logger.warning("언어 감지에 실패하여 기본값(영어)을 사용합니다.")
             source_language = "en"  # 기본 언어 설정
-
-        # 번역할 언어 설정
-        target_language = "en" if source_language != "en" else "ko"
-
+        # 번역할 언어 설정 (알파벳 포함 메시지는 영어로 고정)
+        target_language = "en" if re.search(r'[a-zA-Z]', masked_content) else "ko"  # 알파벳 포함 메시지는 영어로 번역
+        if source_language == "en":
+            target_language = "ko" # en -> ko 로 고정
+        elif source_language != "en" and target_language == "ko":
+            target_language = "en"
+        
         # 문단 단위로 나누기 위해 개행 문자를 기준으로 분리
         paragraphs = masked_content.split('\n\n')
         translated_paragraphs = []
@@ -195,7 +203,7 @@ async def translate_message(content):
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content":
-                        "You are a translation assistant. Translate the content into the specified target language. For Korean translations, use '-요' endings for general conversation. Avoid formal endings like '-다 / -습니다'. Use informal endings or slang for personal thoughts, casual statements, or emotions. Keep the translation concise and clear, avoiding filler language. Preserve bullet points, numbered lists, and formatting."},
+                        "You are a translation assistant. Translate the content into the specified target language.For Korean translations, use '-요' endings for general conversation. Avoid formal endings like '-다 / -습니다'. Use informal endings or slang for personal thoughts, casual statements, or emotions. Keep the translation concise and clear, avoiding filler language. Preserve bullet points, numbered lists, and formatting. and do not avoid slang."},
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=300,
