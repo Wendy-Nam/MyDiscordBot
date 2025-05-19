@@ -1,0 +1,4 @@
+python-dotenv==1.0.1
+openai==0.28.1
+discord.py==2.3.2
+langdetect==1.0.9
