@@ -1,0 +1,24 @@
+# GCP (Google Cloud Platform) specific files
+key.json
+.env
+
+# Terraform generated files
+.terraform/
+*.tfplan
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+# .tfvars 파일 (예: terraform.tfvars)
+*.tfvars    
+# JSON 형식의 변수 파일
+*.tfvars.json  
+
+# Local overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Backup files
+*.backup

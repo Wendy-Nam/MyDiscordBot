@@ -1,0 +1,12 @@
+# Python specific files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+venv/
+.env
+
+# Logs
+logs/
+*.log
+nohup.out

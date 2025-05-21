@@ -1,0 +1,33 @@
+name: Python Bot CI
+
+on:
+  push:
+    paths:
+      - 'application/discord-bot/**'
+  pull_request:
+    paths:
+      - 'application/discord-bot/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        working-directory: application/discord-bot
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # 테스트 코드가 있다면 여기에 추가
+      # - name: Run tests
+      #   working-directory: application/discord-bot
+      #   run: pytest

@@ -1,9 +1,14 @@
 # Ignore files and directories that should not be tracked by Git
 
+# Backup files
+*.backup
+# VS Code specific files (if using VS Code)
+.vscode/
+
+# Global ignores
+.DS_Store
 .env
-
-logs/
-*.log
-
-*.pyc
-__pycache__/
+key.json # 최상위에 있다면
+logs/    # 최상위에 있다면
+discord.log # 최상위에 있다면
+__pycache__/ # 최상위에 있다면
