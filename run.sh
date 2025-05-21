@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 스크립트 설정
-PYTHON_SCRIPT="bot.py"
+PYTHON_SCRIPT="main.py"
 LOG_DIR="./logs"
 PYTHON_EXECUTABLE="python3" # python 3.12.2
 
@@ -63,7 +63,7 @@ nohup "$PYTHON_EXECUTABLE" "$PYTHON_SCRIPT" > "$LOG_FILE" 2>&1 &
 BACKEND_PID=$!
 echo "백엔드 파이썬 프로세스 PID: $BACKEND_PID"
 echo "백엔드 프로세스가 nohup으로 백그라운드에서 실행 중입니다. 로그는 $LOG_FILE에 기록됩니다."
-
+tail -f "$LOG_FILE"
 # 스크립트가 종료되지 않도록 백엔드 프로세스 대기
 wait "$BACKEND_PID"
 
