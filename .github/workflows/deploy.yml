@@ -11,33 +11,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get VM IP
-        working-directory: infrastructure/gcp
-        run: terraform output -raw instance_external_ip > vm_ip.txt
-
-      - name: Read VM IP
-        id: read_ip
-        run: echo "VM_IP=$(cat infrastructure/gcp/vm_ip.txt)" >> $GITHUB_ENV
+      - name: Copy source to VM
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.REMOTE_SSH_HOST }}
+          username: ${{ secrets.REMOTE_SSH_USERNAME }}
+          key: ${{ secrets.REMOTE_SSH_KEY }}
+          passphrase: ${{ secrets.REMOTE_SSH_PASSPHRASE }}
+          source: "."
+          target: "~/my-python-app"
+          rm: true
 
       - name: SSH and run deployment script
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.VM_IP }}
-          username: 42.4.senam@gmail.com
-          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+          host: ${{ secrets.REMOTE_SSH_HOST }}
+          username: ${{ secrets.REMOTE_SSH_USERNAME }}
+          key: ${{ secrets.REMOTE_SSH_KEY }}
+          passphrase: ${{ secrets.REMOTE_SSH_PASSPHRASE }}
           script: |
             set -e
-            # 소스코드 준비
-            if [ ! -d /opt/my-python-app ]; then
-              git clone ${{ secrets.REPO_URL }} /opt/my-python-app
-            else
-              cd /opt/my-python-app
-              git pull
-              cd -
-            fi
-            git pull || git clone ${{ secrets.REPO_URL }} /opt/my-python-app
-            cd /opt/my-python-app/application/discord-bot
-            # Python 가상환경 및 의존성 설치
+            sudo apt-get update
+            sudo apt-get install -y python3-venv
+            cd ~/my-python-app/application/discord-bot
             if [ ! -d venv ]; then
               python3 -m venv venv
             fi
@@ -46,15 +42,11 @@ jobs:
             if [ -f requirements.txt ]; then
               pip install -r requirements.txt
             fi
-
-            # .env 파일 생성
             cat <<EOF > .env
             DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }}
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
             IGNORED_ROLE_IDS=${{ secrets.IGNORED_ROLE_IDS }}
             EOF
             chmod 600 .env
-
-            # run.sh 실행 (백그라운드)
             chmod +x run.sh
             nohup ./run.sh > bot.log 2>&1 &
