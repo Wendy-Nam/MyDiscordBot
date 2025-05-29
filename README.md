@@ -19,7 +19,7 @@ AI 기반 번역 및 맞춤형 프롬프트를 통해 한국어의 맥락과 특
 
 Lingo Bot(V1)은 2024년 9월 해외 게임잼 프로젝트에서 한국어-영어 사용자 간의 언어 장벽으로 인한 소통 문제를 해결하기 위해 개발되었습니다. 개발 결과, 팀 협업 및 분위기 개선에 즉각적으로 효과를 주었고 매우 긍정적인 반응을 얻었습니다.
 
-> 자세한 후기 : [Lingo V1 기준 - 실제 팀 도입 사례](https://educated-tarsier-f16.notion.site/GCP-IaaS-1f79bf46184a8021a6b0d52d1aee06f3?pvs=74)
+### 자세한 후기 : [Lingo V1 기준 - 실제 팀 도입 사례](https://educated-tarsier-f16.notion.site/GCP-IaaS-1f79bf46184a8021a6b0d52d1aee06f3?pvs=74)
 
 
 ## ✨ 주요 기능
