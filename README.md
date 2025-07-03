@@ -2,6 +2,8 @@
 
 ![Image](/docs/thumbnail.png)
 
+## [Project Details & Background](https://educated-tarsier-f16.notion.site/GCP-Infra-Automation-Discord-Bot-Deployment-2109bf46184a805eaf06cf4851c47821?source=copy_link)
+
 ## Overview
 
 **LingoBot** is an AI-powered Discord bot that provides real-time bidirectional translation between Korean and English in Discord servers.  
