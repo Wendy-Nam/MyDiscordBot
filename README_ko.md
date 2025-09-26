@@ -2,25 +2,9 @@
 
 ![Image](/docs/thumbnail.png)
 
+## 개요
+
 AI 기반 번역 및 맞춤형 프롬프트를 통해 한국어의 맥락과 특징을 살려 자연스럽고 가독성 높은 번역문을 제공합니다. 봇은 사용자의 메시지 발송 즉시 상대방 언어로 번역을 덧붙여 실시간 소통과 내용 파악을 돕습니다.
-
-## 🚧 진행도 (Lingo V2 / 2025 ver.)
-
-- **현재 상태**: GCP Terraform 리소스 구성 및 GitHub Actions CI/CD 구축 완료. 배포 테스트 완료
-
-- **V2 개선 사항**:
-  - 디스코드 앱 슬래시 커맨드 도입 (기존 멘션/텍스트 명령어 대체).
-  - `langdetect` 패키지 활용으로 언어 감지 오류 감소.
-- **향후 계획**: `CI/CD 기술 문서` 및 `설치/사용 매뉴얼` 빠른 시일 내 제공 (별도 README 업데이트 예정)
-
----
-
-## 🗓️ 개발 배경 (Lingo V1 / 2024 ver.)
-
-Lingo Bot(V1)은 2024년 9월 해외 게임잼 프로젝트에서 한국어-영어 사용자 간의 언어 장벽으로 인한 소통 문제를 해결하기 위해 개발되었습니다. 개발 결과, 팀 협업 및 분위기 개선에 즉각적으로 효과를 주었고 매우 긍정적인 반응을 얻었습니다.
-
-### 자세한 후기 : [Lingo V1 기준 - 실제 팀 도입 사례](https://educated-tarsier-f16.notion.site/GCP-IaaS-1f79bf46184a8021a6b0d52d1aee06f3?pvs=74)
-
 
 ## ✨ 주요 기능
 * **실시간 한-영 상호 통역:** 채널 내 메시지 자동 번역 후 원문 아래 표시. (`0.5 ~ 1.5초` 내외의 즉각적인 처리)
@@ -28,6 +12,38 @@ Lingo Bot(V1)은 2024년 9월 해외 게임잼 프로젝트에서 한국어-영�
 * **채널 관리 명령어:** `!add_channel`, `!del_channel` 또는 슬래시 app command로 번역 대상 채널 및 스레드 id 관리 및 각 등록에 대한 비동기 처리.
 * **텍스트 전처리:** 정규식 사용, URL 마스킹, 긴 메시지 분할.
 * **디스코드 포맷팅 유지, 봇 충돌 방지.**
+
+## 🗓️ 개발 배경
+
+Lingo Bot(V1)은 2024년 9월 해외 게임잼 프로젝트에서 한국어-영어 사용자 간의 언어 장벽으로 인한 소통 문제를 해결하기 위해 개발되었습니다. 개발 결과, 팀 협업 및 분위기 개선에 즉각적으로 효과를 주었고 매우 긍정적인 반응을 얻었습니다.
+
+### 자세한 후기 : [Lingo V1 기준 - 실제 팀 도입 사례](https://educated-tarsier-f16.notion.site/GCP-IaaS-1f79bf46184a8021a6b0d52d1aee06f3?pvs=74)
+
+## 🚧 진행도 (Lingo V2 / 2025 ver.)
+
+- **현재 상태**: GCP Terraform 리소스 구성 및 GitHub Actions CI/CD 구축 완료. 배포 테스트 완료
+- **V2 개선 사항**:
+  - 디스코드 앱 슬래시 커맨드 도입 (기존 멘션/텍스트 명령어 대체).
+  - `langdetect` 패키지 활용으로 언어 감지 오류 감소.
+- **향후 계획**: `CI/CD 기술 문서` 및 `설치/사용 매뉴얼` 빠른 시일 내 제공 (별도 README 업데이트 예정)
+
+## Lingo Bot V1 vs V2 비교
+
+| 특징 | V1 | V2 |
+|---|---|---|
+|   **사용자 인터페이스** |   텍스트 기반 명령어 (`!add_channel`, `!del_channel`)   |   앱 슬래시 커맨드 추가 (`/add_channel`, `/del_channel`)   |
+|   **언어 감지** |   기본적인 한국어 문자 포함 여부 확인 (부정확할 수 있음)   |   `langdetect` 라이브러리를 사용한 정확한 언어 감지   |
+|   **환경 설정** |   실행 시 코드 변수 수정 (관리 불편)   |   `.env` 파일을 통한 분리 및 관리 (더 안전하고 편리)   |
+|   **배포** |   GCP Compute Engine Free Tier 활용   |   GCP Compute Engine Free Tier 활용, Terraform 및 Github Actions를 통한 인프라 배포   |
+
+## ⚙️ 기술 아키텍처
+
+- **언어**: Python (discord.py, openai, langdetect)
+- **인프라**:
+    - **Google Cloud Platform (GCP) Compute Engine** 배포
+    - **Terraform**과 **GitHub Actions**로 인프라 자동화
+    - GitHub Secrets를 통한 안전한 자격 증명 관리
+    - 현재 Terraform 설정으로 초기 배포 지원; 향후 원격 tfstate 백엔드 구현 계획
 
 ## 사전 준비물
 - `Discord 봇 토큰`: 디스코드 Developer Portal에서 수동 생성 필요.
@@ -38,8 +54,6 @@ Lingo Bot(V1)은 2024년 9월 해외 게임잼 프로젝트에서 한국어-영�
 > `docs/` 디렉토리의 스크린샷 참조
 
 비즈니스, 문학, 슬랭, 관용어구, 일상 대화 등의 다양한 한-영 번역 테스트 사례를 `docs/lingoV2/`에서 스크린샷으로 확인할 수 있습니다. 오랜 **한국어 강사 경험**을 바탕으로, 자연스러운 한국어 맥락을 위해 프롬프트 조정 및 광범위한 문장 테스트를 거쳤습니다.
-
----
 
 ## GitHub Secrets
 
@@ -63,28 +77,13 @@ Lingo Bot(V1)은 2024년 9월 해외 게임잼 프로젝트에서 한국어-영�
     - Terraform 리모트 상태(remote state) 관리를 통한 안전한 인프라 업데이트 지원
     - 로그 관리 및 모니터링 고도화
 
----
-
-## Lingo Bot V1 vs V2 비교
-
-| 특징 | V1 | V2 |
-|---|---|---|
-|   **사용자 인터페이스** |   텍스트 기반 명령어 (`!add_channel`, `!del_channel`)   |   앱 슬래시 커맨드 추가 (`/add_channel`, `/del_channel`)   |
-|   **언어 감지** |   기본적인 한국어 문자 포함 여부 확인 (부정확할 수 있음)   |   `langdetect` 라이브러리를 사용한 정확한 언어 감지   |
-|   **환경 설정** |   실행 시 코드 변수 수정 (관리 불편)   |   `.env` 파일을 통한 분리 및 관리 (더 안전하고 편리)   |
-|   **배포** |   GCP Compute Engine Free Tier 활용   |   GCP Compute Engine Free Tier 활용, Terraform 및 Github Actions를 통한 인프라 배포   |
-
 ## ⚙️ Summa 기능 (보류)
 
 팀 대화 요약 기능으로 개발 및 테스트 되었으나, 성능 및 일정 문제로 도입 보류. V2 이전의 커밋에서 찾을 수 있음.
 
----
-
 ## ⚠️ 주의사항
 
 V2 이전 시기의 모든 커밋 내역은 2024년 9월 기반으로, key 값 제거 및 커밋 재정비로 인해 깃 히스토리가 재작성되었습니다.
-
----
 
 ## 🚀 배포
 
@@ -107,3 +106,39 @@ V2 이전 시기의 모든 커밋 내역은 2024년 9월 기반으로, key 값 �
 **배포 순서**: 인프라 (수동) → 배포 (수동)
 
 **참고**: 두 워크플로우 모두 `workflow_dispatch` 트리거를 사용하므로 GitHub Actions 인터페이스에서 수동 실행이 필요합니다.
+
+## 🤖 봇 서버 초대 방법
+
+### 1. Discord Developer Portal에서 초대 링크 생성
+1. [Discord Developer Portal](https://discord.com/developers/applications) 접속
+2. 본인의 봇 애플리케이션 선택
+3. 좌측 메뉴에서 **"OAuth2"** → **"URL Generator"** 클릭
+
+### 2. 필요한 권한 설정
+**SCOPES 선택:**
+- ✅ `bot`
+- ✅ `applications.commands` (슬래시 커맨드용)
+
+**BOT PERMISSIONS 선택:**
+- ✅ `Send Messages` (메시지 전송)
+- ✅ `View Channels` (채널 보기)
+- ✅ `Read Message History` (메시지 기록 읽기)
+- ✅ `Use Slash Commands` (슬래시 커맨드 사용)
+
+### 3. 서버 초대 및 설정
+1. 생성된 **GENERATED URL**을 복사하여 브라우저에서 열기
+2. 봇을 초대할 서버 선택 후 **"승인"** 클릭
+3. 서버에서 봇 역할이 적절한 위치에 있는지 확인 (권한 제한 방지)
+4. `/add_channel` 명령어로 번역을 원하는 채널에서 봇 활성화
+5. 테스트 메시지로 번역 기능 확인
+
+## 📚 문서 및 지원
+
+이 README는 기본적인 개요와 사용 가이드를 제공합니다.  
+더 자세한 기술 문서와 고급 설정 가이드는 향후 업데이트에서 추가될 예정입니다.
+
+문의사항이나 피드백은 다음으로 연락해 주세요: [hanzoom2000@gmail.com]
+
+## 📄 라이선스
+
+MIT License
