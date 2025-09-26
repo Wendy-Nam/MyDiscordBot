@@ -6,7 +6,7 @@ resource "google_compute_instance" "python_app_instance" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2004-lts" # Ubuntu 20.04 LTS 이미지
+      image = "projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts" # Ubuntu 20.04 LTS 이미지
     }
   }
 
