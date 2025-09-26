@@ -49,13 +49,25 @@ The bot leverages **OpenAI GPT API** for translation, combined with lightweight 
 
 ### Deployment
 
-1. Deploy the bot on a cloud VM (GCP Compute Engine recommended).
-2. Configure environment variables:
-    - `OPENAI_API_KEY`
-    - `DISCORD_BOT_TOKEN`
-3. Apply Terraform scripts to provision the infrastructure.
-4. Use GitHub Actions to automate deployment via SSH.
-5. Invite the bot to your Discord server and manage translation via bot commands.
+#### Infrastructure Setup
+1. Configure GitHub Secrets with required credentials (see table above)
+2. Manually trigger the **"Terraform GCP Deploy"** workflow to provision GCP infrastructure
+3. Terraform creates a Compute Engine instance with the specified configuration
+
+#### Bot Deployment
+1. Manually trigger the **"Deploy Python Bot"** workflow 
+2. GitHub Actions connects to the VM using pre-configured SSH credentials from GitHub Secrets
+3. The workflow automatically:
+   - Copies the Python bot source code to the VM
+   - Sets up Python virtual environment
+   - Installs dependencies from `requirements.txt`
+   - Creates `.env` file with environment variables (`DISCORD_BOT_TOKEN`, `OPENAI_API_KEY`, `IGNORED_ROLE_IDS`)
+   - Starts the bot service using `run.sh`
+4. Invite the bot to your Discord server and manage translation via bot commands
+
+**Deployment Flow**: Infrastructure (manual) → Deploy (manual)
+
+**Note**: Both workflows use `workflow_dispatch` triggers, requiring manual execution through GitHub Actions interface.
 
 ## Limitations & Future Plans
 
